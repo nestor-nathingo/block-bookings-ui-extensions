@@ -1,0 +1,12 @@
+{
+  "appFunctions": {
+    "myFunc": {
+      "file": "example-function.js",
+      "secrets": []
+    },
+    "bookingValidation": {
+      "file": "booking-validation.js",
+      "secrets": []
+    }
+  }
+}
