@@ -13,8 +13,7 @@
     "createDeal": {
       "file": "create-deal.js",
       "secrets": [
-        "HUBSPOT_ACCESS_TOKEN",
-        "HUBSPOT_DEAL_PIPELINE"
+        "HUBSPOT_ACCESS_TOKEN"
       ]
     }
   }
