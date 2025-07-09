@@ -6,11 +6,16 @@
     },
     "bookingValidation": {
       "file": "booking-validation.js",
-      "secrets": []
+      "secrets": [
+        "BOOKING_URL"
+      ]
     },
     "createDeal": {
       "file": "create-deal.js",
-      "secrets": []
+      "secrets": [
+        "HUBSPOT_ACCESS_TOKEN",
+        "HUBSPOT_DEAL_PIPELINE"
+      ]
     }
   }
 }
