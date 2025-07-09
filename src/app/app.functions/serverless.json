@@ -10,9 +10,7 @@
     },
     "createDeal": {
       "file": "create-deal.js",
-      "secrets": {
-       
-      }
+      "secrets": []
     }
   }
 }
