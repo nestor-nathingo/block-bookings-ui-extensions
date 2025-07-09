@@ -4,9 +4,11 @@ exports.main = async (context = {}) => {
   const { bookingDisplays, bookingReference } = context.parameters;
   const bookingsEndpoint = process.env.BOOKING_URL;
 
-  console.log("Booking displays Received:", bookingDisplays);
-  console.log("Booking reference Received:", bookingReference);
-
+  /**
+   * Transforms the booking response to a more readable format.
+   * @param {Object} bookingResponse - The response object from the booking API.
+   * @returns {Object} - Transformed response with validation status and messages.
+   */
 
   function transformBookingResponse(bookingResponse) {
     const result = {};
@@ -23,7 +25,9 @@ exports.main = async (context = {}) => {
     return result;
   }
 
+  //
   try {
+    // Validate the required parameters
     let parameters = {
       "Block_Booking_Validation": 1,
       ...(!!bookingDisplays && { "Booking_Displays": bookingDisplays }),
