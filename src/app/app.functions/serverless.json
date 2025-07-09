@@ -7,6 +7,12 @@
     "bookingValidation": {
       "file": "booking-validation.js",
       "secrets": []
+    },
+    "createDeal": {
+      "file": "create-deal.js",
+      "secrets": {
+       
+      }
     }
   }
 }
