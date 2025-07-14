@@ -11,12 +11,13 @@ import {
 	LoadingButton,
 } from "@hubspot/ui-extensions";
 import { validateBlockBookingForm } from "./utils/block-bookings-utils";
-import { CrmActionButton } from '@hubspot/ui-extensions/crm';
 
 export const DealValidation = ({ context, runServerless, sendAlert }) => {
+	const ticketId = context?.crm?.objectId;
 	const [blockBookingType, setBlockBookingType] = useState("");
 	const [isLoading, setIsLoading] = useState(null);
 	const [validatedFormData, setValidatedFormData] = useState(null);
+	const [isFormSubmissionSuccessful, setIsFormSubmissionSuccessful] = useState(false);
 	const [formValidationStates, setFormValidationStates] = useState({
 		dealName: {
 			required: true,
@@ -29,6 +30,12 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 			message: "Please select a deal type",
 			isValid: true,
 			label: "deal-type",
+		},
+		dealStage: {
+			required: true,
+			message: "Please select a deal stage",
+			isValid: true,
+			label: "deal-stage",
 		},
 		blockBookingType: {
 			required: true,
@@ -59,7 +66,6 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 			isValid: true,
 			label: "block-booking-email-recipient",
 		},
-
 	});
 
 	const getFormStates = () => {
@@ -67,7 +73,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 		return formValidationStates;
 	}
 
-	const createDeal = async (dealName, dealType, blockBookingType, innkeeperBookingNumbers, innkeeperBookingReference, emailRecipient) => {
+	const createDeal = async (dealName, dealType, blockBookingType, innkeeperBookingNumbers, innkeeperBookingReference, dealStage, emailRecipient, ticketId) => {
 		const { response } = await runServerless({
 			name: "createDeal",
 			parameters: {
@@ -76,34 +82,12 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 				blockBookingType,
 				innkeeperBookingNumbers,
 				innkeeperBookingReference,
-				emailRecipient
+				dealStage,
+				emailRecipient,
+				ticketId, // Pass the ticket ID to the serverless function
 			}
 		});
 		console.log("Response from createDeal:", response);
-
-		// if (response.success) {
-		// 	sendAlert({ message: "Deal created successfully!", type: "success" });
-		// 	setFormValidationStates((prevStates) => ({
-		// 		...prevStates,
-		// 		dealName: {
-		// 			...prevStates.dealName,
-		// 			isValid: true,
-		// 		},
-		// 	}));
-		// 	setIsLoading(false);
-		// }
-		// else {
-		// 	sendAlert({ message: `Error creating deal: ${response.message}`, type: "danger" });
-		// 	setFormValidationStates((prevStates) => ({
-		// 		...prevStates,
-		// 		dealName: {
-		// 			...prevStates.dealName,
-		// 			isValid: false,
-		// 			message: response.message,
-		// 		},
-		// 	}));
-		// 	setIsLoading(false);
-		// }
 
 	}
 
@@ -116,11 +100,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 	 */
 
 	const handleClick = async (bookingDisplays, bookingReference) => {
-		console.log("Submit button clicked in handleclick, isLoading Before:", isLoading);
 		setIsLoading(true);
-		console.log("Submit button clicked in handleclick, isLoading After:", isLoading);
-
-		// console.log("Form data (in handleclick) submitted:", bookingDisplays ?? bookingReference, "ContextHere:", context);
 		const { response } = await runServerless({ name: "bookingValidation", parameters: { bookingDisplays, bookingReference } });
 
 		if (blockBookingType === "tour") {
@@ -135,6 +115,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 					},
 				}));
 				setIsLoading(false);
+				setIsFormSubmissionSuccessful(true);
 			} else {
 
 				// console.log("No Booking IDs found in response");
@@ -148,8 +129,10 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 					},
 				}));
 				setIsLoading(false);
+				setIsFormSubmissionSuccessful(false);
 			}
 		} else {
+			// If the block booking type is not "tour", we assume it's "adhoc" or "fit"
 			const filteredObject = Object.fromEntries(
 				Object.entries(response).filter(([key, value]) => {
 					console.log("Filtering key:", key, "with value:", value);
@@ -177,7 +160,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 					},
 				}));
 				setIsLoading(false);
-
+				setIsFormSubmissionSuccessful(false);
 
 			} else {
 				sendAlert({ message: "All booking numbers are valid.", type: "success" });
@@ -189,12 +172,9 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 					},
 				}));
 				setIsLoading(false);
+				setIsFormSubmissionSuccessful(true);
 			}
-
-
 		}
-
-		// sendAlert({ message: "Form submitted successfully! Response: " + response, type: "success" });
 	};
 	// Define the options for the select inputs
 	const dealTypeOptions = [
@@ -202,12 +182,21 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 		{ label: "Existing Business", value: "existingbusiness" },
 	]
 
+	const dealStageOptions = [
+		{ label: "Booking Made", value: "227262248" },
+		{ label: "120 Day", value: "216992673" },
+		{ label: "90 Day", value: "216992674" },
+		{ label: "60 Day", value: "216992675" },
+		{ label: "30 Day", value: "216992676" },
+		{ label: "Confirmed", value: "216992677" },
+		{ label: "Cancelled", value: "216992678" },
+	];
+
 	const blockBookingTypeOptions = [
 		{ label: "ADHOC", value: "adhoc" },
 		{ label: "TOUR", value: "tour" },
 		{ label: "FIT", value: "fit" },
 	];
-
 
 	/**
 	 * Returns the booking reference input field based on the block booking type.
@@ -238,6 +227,8 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 							},
 							...(blockBookingType === "tour" && { innkeeperBookingNumbers: { ...prevStates.innkeeperBookingNumbers, isValid: true } }),
 						}));
+						setIsFormSubmissionSuccessful(true);
+
 					}}
 				/>
 			);
@@ -264,6 +255,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 							...(blockBookingType !== "tour" && { innkeeperBookingReference: { ...prevStates.innkeeperBookingReference, isValid: true } })
 						}));
 						// setIsLoading(false);
+						setIsFormSubmissionSuccessful(true);
 					}}
 				/>
 			);
@@ -272,17 +264,18 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 
 	return (
 		<>
+			{console.log("Rendering DealValidation component with context:", context)}
 			<Form
 				// get form data on submit
 				onSubmit={(event) => {
-
+					// setIsFormSubmissionSuccessful(false);
 					const bookingDisplays = event.targetValue["innkeeper-booking-numbers"];
 					const bookingReference = event.targetValue["innkeeper-booking-reference"];
 					const dealName = event.targetValue["deal-name"];
 					const dealType = event.targetValue["deal-type"];
 					const blockBookingType = event.targetValue["block-booking-type"];
+					const dealStage = event.targetValue["deal-stage"];
 					const emailRecipient = event.targetValue["block-booking-email-recipient"];
-					// validateBlockBookingForm(event, sendAlert, getFormStates, setFormValidationStates, () => handleClick(bookingDisplays, bookingReference), setIsLoading);
 					validateBlockBookingForm(
 						event,
 						sendAlert,
@@ -296,13 +289,13 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 								blockBookingType,
 								innkeeperBookingNumbers: bookingDisplays,
 								innkeeperBookingReference: bookingReference,
+								dealStage,
 								emailRecipient
 							});
 						},
 
 					);
 				}}
-
 			>
 				<Input
 					label="Deal Name"
@@ -376,6 +369,29 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 					bookingReferenceInput()
 				}
 
+				<Select
+					label="Deal Stage"
+					name="deal-stage"
+					tooltip="Please enter the deal stage"
+					description="Please enter the deal stage"
+					placeholder="Deal stage"
+					required={true}
+					error={!formValidationStates.dealStage.isValid}
+					validationMessage={formValidationStates.dealStage.message}
+					options={dealStageOptions}
+					onChange={(value) => {
+						const isValid = value !== "";
+						setFormValidationStates((prevStates) => ({
+							...prevStates,
+							dealStage: {
+								...prevStates.dealStage,
+								isValid: isValid,
+							},
+						}));
+					}}
+				/>
+
+
 				<Input
 					label="Block Booking Email Recipient"
 					name="block-booking-email-recipient"
@@ -408,31 +424,32 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 				>
 					Submit
 				</LoadingButton>
-
-				{/* <Button
-					variant="secondary"
-					disabled={!validatedFormData} // prevent accidental empty submit
-					onClick={async () => {
-						if (validatedFormData) {
-							await createDeal(
-								validatedFormData.dealName,
-								validatedFormData.dealType,
-								validatedFormData.blockBookingType,
-								validatedFormData.innkeeperBookingNumbers,
-								validatedFormData.innkeeperBookingReference,
-								validatedFormData.emailRecipient
-							);
-						} else {
-							sendAlert({ message: "Please submit the form first", type: "danger" });
-						}
-					}}
-				>
-					Create new record
-				</Button> */}
-
+				{isFormSubmissionSuccessful && validatedFormData && !isLoading && (
+					<Button
+						variant="secondary"
+						disabled={!validatedFormData} // prevent accidental empty submit
+						// onClick={async () => {
+						// 	if (validatedFormData) {
+						// 		await createDeal(
+						// 			validatedFormData.dealName,
+						// 			validatedFormData.dealType,
+						// 			validatedFormData.blockBookingType,
+						// 			validatedFormData.innkeeperBookingNumbers,
+						// 			validatedFormData.innkeeperBookingReference,
+						// 			validatedFormData.dealStage,
+						// 			validatedFormData.emailRecipient,
+						// 			ticketId
+						// 		);
+						// 	} else {
+						// 		sendAlert({ message: "Please submit the form first", type: "danger" });
+						// 	}
+						// }}
+					>
+						Create new record
+					</Button>
+				)}
 
 			</Form >
-
 		</>
 	);
 };

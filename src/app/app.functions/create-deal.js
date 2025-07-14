@@ -3,42 +3,61 @@ const hubspot = require('@hubspot/api-client');
 
 exports.main = async (context = {}) => {
     console.log("Creating a deal in HubSpot with the following parameters:", context.parameters);
-    const { dealName, dealAmount, dealStage, dealPipeline } = context.parameters;
+
+    const { dealName, dealType, blockBookingType, innkeeperBookingNumbers, innkeeperBookingReference, dealStage, emailRecipient, ticketId } = context.parameters;
     const hubspotClient = new hubspot.Client({ accessToken: process.env.HUBSPOT_ACCESS_TOKEN });
+    const dealPipeline = process.env.HUBSPOT_DEAL_PIPELINE; // Ensure this is set in your environment variables
 
     const dealProperties = {
         properties: {
             dealname: dealName,
-            amount: dealAmount,
+            dealtype: dealType,
             dealstage: dealStage,
-            pipeline: dealPipeline
-        }
-        // associations: {
-        //     // You can add associations here if needed, e.g., to associate with a contact or company
-        //     // "associatedVids": [contactId],
-        //     // "associatedCompanyIds": [companyId]
-        // }  
+            pipeline: dealPipeline.toString(), // Ensure pipeline is a string
+            // Optional custom properties
+            // blockbookingtype: blockBookingType,
+            // innkeeperbookingnumbers: innkeeperBookingNumbers,
+            // innkeeperbookingreference: innkeeperBookingReference,
+            // emailrecipient: emailRecipient,
+        },
 
     };
     console.debug("📨 Payload to HubSpot API:", dealProperties);
 
+
     try {
-
-        const response = await hubspotClient.crm.deals.basicApi.create(dealProperties);
-        console.debug("📬 Response from HubSpot API:", response);
+        const createDealResponse = await hubspotClient.crm.deals.basicApi.create(dealProperties);
         console.info("✅ Deal created successfully");
-        console.log("🧾 Response body:", response);
-        console.debug("🧾 Response body:", response.body);
+        console.debug("📬 Response from HubSpot API:", createDealResponse);
 
+        const dealId = createDealResponse.id;
+        console.info(`Deal ID: ${dealId}`);
         // return { success: true, message: "Deal created successfully", dealId: response.id };
-     response = {
+
+        //2. Associate the deal with the ticket
+        if (ticketId && dealId) {
+            console.info(`Associating deal with ticket ID: ${ticketId}`);
+            await hubspotClient.crm.deals.associationsApi.create(dealId,         // fromObjectId
+                'tickets',      // toObjectType
+                ticketId,       // toObjectId
+                27
+            );
+            console.info("✅ Deal associated with ticket successfully");
+            console.log(`Deal ${dealId} associated with ticket ${ticketId}`);
+
+        }
+
+        return {
             success: true,
             message: "Deal created successfully",
-            dealId: response.body.id,
-            data: response.body
-        };
-        return response;
+            dealId,
+            details: {
+                properties: createDealResponse.properties,
+                associations: createDealResponse.associations || {}
+            }
+        }
     } catch (error) {
+        console.log("❌ Error creating deal:", error.message);
         // Step 6: Better error diagnostics
         console.error("❌ Error creating deal:", {
             message: error.message,
@@ -58,6 +77,4 @@ exports.main = async (context = {}) => {
             },
         };
     }
-
-
 }
