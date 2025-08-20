@@ -13,7 +13,7 @@ exports.main = async (context = {}) => {
             dealname: dealName,
             dealtype: dealType,
             dealstage: dealStage,
-            pipeline: dealPipeline.toString(), // pipeline is a string
+            pipeline: dealPipeline, 
             block_booking_type: blockBookingType,
             innkeeper_booking_numbers: innkeeperBookingNumbers,
             innkeeper_booking_references: innkeeperBookingReference,
