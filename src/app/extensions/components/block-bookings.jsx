@@ -296,7 +296,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 				}}
 			>
 				<Input
-					label="Deal Name"
+					label={`Deal Name ${process.env.HUBSPOT_DEAL_PIPELINE}`}
 					name="deal-name"
 					tooltip="Please enter your deal name"
 					description="Please enter your deal name"
