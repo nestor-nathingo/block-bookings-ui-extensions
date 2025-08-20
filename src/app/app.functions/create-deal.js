@@ -4,26 +4,25 @@ const hubspot = require('@hubspot/api-client');
 exports.main = async (context = {}) => {
     console.log("Creating a deal in HubSpot with the following parameters:", context.parameters);
 
-    const { dealName, dealType, blockBookingType, innkeeperBookingNumbers, innkeeperBookingReference, dealStage, emailRecipient, ticketId } = context.parameters;
+    const { dealName, dealType, blockBookingType, innkeeperBookingNumbers, innkeeperBookingReference, dealStage, emailRecipient, ticketId, dealOwner } = context.parameters;
     const hubspotClient = new hubspot.Client({ accessToken: process.env.HUBSPOT_ACCESS_TOKEN });
-    const dealPipeline = process.env.HUBSPOT_DEAL_PIPELINE; // Ensure this is set in your environment variables
+    const dealPipeline = process.env.HUBSPOT_DEAL_PIPELINE;
 
     const dealProperties = {
         properties: {
             dealname: dealName,
             dealtype: dealType,
             dealstage: dealStage,
-            pipeline: dealPipeline.toString(), // Ensure pipeline is a string
-            // Optional custom properties
-            // blockbookingtype: blockBookingType,
-            // innkeeperbookingnumbers: innkeeperBookingNumbers,
-            // innkeeperbookingreference: innkeeperBookingReference,
-            // emailrecipient: emailRecipient,
+            pipeline: dealPipeline.toString(), // pipeline is a string
+            block_booking_type: blockBookingType,
+            innkeeper_booking_numbers: innkeeperBookingNumbers,
+            innkeeper_booking_references: innkeeperBookingReference,
+            block_booking_email_recipient: emailRecipient,
+            hubspot_owner_id: dealOwner
         },
 
     };
     console.debug("📨 Payload to HubSpot API:", dealProperties);
-
 
     try {
         const createDealResponse = await hubspotClient.crm.deals.basicApi.create(dealProperties);
@@ -32,7 +31,6 @@ exports.main = async (context = {}) => {
 
         const dealId = createDealResponse.id;
         console.info(`Deal ID: ${dealId}`);
-        // return { success: true, message: "Deal created successfully", dealId: response.id };
 
         //2. Associate the deal with the ticket
         if (ticketId && dealId) {
@@ -44,7 +42,6 @@ exports.main = async (context = {}) => {
             );
             console.info("✅ Deal associated with ticket successfully");
             console.log(`Deal ${dealId} associated with ticket ${ticketId}`);
-
         }
 
         return {
@@ -58,7 +55,6 @@ exports.main = async (context = {}) => {
         }
     } catch (error) {
         console.log("❌ Error creating deal:", error.message);
-        // Step 6: Better error diagnostics
         console.error("❌ Error creating deal:", {
             message: error.message,
             statusCode: error.response?.status,

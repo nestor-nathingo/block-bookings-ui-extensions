@@ -33,7 +33,7 @@ exports.main = async (context = {}) => {
       ...(!!bookingDisplays && { "Booking_Displays": bookingDisplays }),
       ...(!!bookingReference && { "Booking_Reference": bookingReference }),
     };
-
+ 
     const response = await axios({
       method: 'get',
       url: bookingsEndpoint,
