@@ -13,6 +13,7 @@ import {
 } from "@hubspot/ui-extensions";
 import { validateBlockBookingForm } from "./utils/block-bookings-utils";
 
+
 export const DealValidation = ({ context, runServerless, sendAlert }) => {
 	const ticketId = context?.crm?.objectId;
 	const [blockBookingType, setBlockBookingType] = useState("");
@@ -296,7 +297,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 				}}
 			>
 				<Input
-					label={`Deal Name ${process.env.HUBSPOT_DEAL_PIPELINE}`}
+					label="Deal Name"
 					name="deal-name"
 					tooltip="Please enter your deal name"
 					description="Please enter your deal name"

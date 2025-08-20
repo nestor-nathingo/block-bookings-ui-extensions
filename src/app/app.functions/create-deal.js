@@ -6,21 +6,20 @@ exports.main = async (context = {}) => {
 
     const { dealName, dealType, blockBookingType, innkeeperBookingNumbers, innkeeperBookingReference, dealStage, emailRecipient, ticketId, dealOwner } = context.parameters;
     const hubspotClient = new hubspot.Client({ accessToken: process.env.HUBSPOT_ACCESS_TOKEN });
-    const dealPipeline = process.env.HUBSPOT_DEAL_PIPELINE;
+    const dealPipeline = String(process.env.HUBSPOT_DEAL_PIPELINE);
 
     const dealProperties = {
         properties: {
             dealname: dealName,
             dealtype: dealType,
             dealstage: dealStage,
-            pipeline: dealPipeline, 
+            pipeline: dealPipeline,
             block_booking_type: blockBookingType,
             innkeeper_booking_numbers: innkeeperBookingNumbers,
             innkeeper_booking_references: innkeeperBookingReference,
             block_booking_email_recipient: emailRecipient,
             hubspot_owner_id: dealOwner
         },
-
     };
     console.debug("📨 Payload to HubSpot API:", dealProperties);
 
