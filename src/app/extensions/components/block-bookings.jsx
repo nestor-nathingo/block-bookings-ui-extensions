@@ -86,22 +86,22 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 		if (context?.crm?.contact?.email) {
 			setEmailRecipient(context.crm.contact.email);
 		}
-		const fetchDealOwner = async () => {
-			const { response } = await runServerless({
-				name: "getOwners",
-				parameters: { userId: context.user.id }, 
-			});
+		// const fetchDealOwner = async () => {
+		// 	const { response } = await runServerless({
+		// 		name: "getOwners",
+		// 		parameters: { userId: context.user.id }, 
+		// 	});
 
-			console.log("Response from getOwners:", response);
+		// 	console.log("Response from getOwners:", response);
 
-			if (response?.owner) {
-				setDealOwner(response.owner.id); // hubspot_owner_id
-			} else {
-				console.error("Owner not found for userId:", context.user.id);
-			}
-		};
+		// 	if (response?.owner) {
+		// 		setDealOwner(response.owner.id); // hubspot_owner_id
+		// 	} else {
+		// 		console.error("Owner not found for userId:", context.user.id);
+		// 	}
+		// };
 
-		fetchDealOwner();
+		// fetchDealOwner();
 	}, [context]);
 
 	const getFormStates = () => formValidationStates;
