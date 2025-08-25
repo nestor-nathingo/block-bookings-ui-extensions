@@ -10,13 +10,15 @@ exports.main = async (context = {}) => {
         accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
     });
 
+    const archived = false;
+
     try {
-        const userId = context.parameters?.userId; // ✅ FIX: parameters not direct context
+        const userId = context.parameters?.userId;
         if (!userId) {
             return { error: "No userId provided" };
         }
 
-        const owner = await hubspotClient.crm.owners.ownersApi.getById(userId);
+        const owner = await hubspotClient.crm.owners.ownersApi.getById(userId, "id", archived);
 
         return { owner };
     } catch (err) {
