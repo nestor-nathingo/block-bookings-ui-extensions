@@ -13,6 +13,13 @@
     "createDeal": {
       "file": "create-deal.js",
       "secrets": [
+        "HUBSPOT_ACCESS_TOKEN",
+        "HUBSPOT_DEAL_PIPELINE"
+      ]
+    },
+    "getOwners": {
+      "file": "get-owners.js",
+      "secrets": [
         "HUBSPOT_ACCESS_TOKEN"
       ]
     }
