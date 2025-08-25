@@ -452,7 +452,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 				>
 					Validate bookings
 				</LoadingButton>
-				{formWasSubmitted && isFormSubmissionSuccessful && validatedFormData && !isLoading && !hasFormError && (
+				{/* {formWasSubmitted && isFormSubmissionSuccessful && validatedFormData && !isLoading && !hasFormError && (
 					<Button
 						variant="secondary"
 						disabled={!validatedFormData}
@@ -477,7 +477,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 						Create deal
 					</Button>
 				)}
-				{isCreatingDeal && <LoadingSpinner />}
+				{isCreatingDeal && <LoadingSpinner />} */}
 			</Form>
 		</>
 	);
