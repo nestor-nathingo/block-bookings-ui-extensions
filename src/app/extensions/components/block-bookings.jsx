@@ -78,15 +78,36 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 	// Track if the form has been submitted and validated successfully
 	const [formWasSubmitted, setFormWasSubmitted] = useState(false);
 
+
+	const [dealOwner, setDealOwner] = useState(null);
+
+
 	useEffect(() => {
 		if (context?.crm?.contact?.email) {
 			setEmailRecipient(context.crm.contact.email);
 		}
+		const fetchDealOwner = async () => {
+			const { response } = await runServerless({
+				name: "getOwners",
+				parameters: { userId: context.user.id }, 
+			});
+
+			console.log("Response from getOwners:", response);
+
+			if (response?.owner) {
+				setDealOwner(response.owner.id); // hubspot_owner_id
+			} else {
+				console.error("Owner not found for userId:", context.user.id);
+			}
+		};
+
+		fetchDealOwner();
 	}, [context]);
 
 	const getFormStates = () => formValidationStates;
+	const dealOwnerId = dealOwner;
 
-	const createDeal = async (dealName, dealType, blockBookingType, innkeeperBookingNumbers, innkeeperBookingReference, dealStage, emailRecipient, ticketId, dealOwner) => {
+	const createDeal = async (dealName, dealType, blockBookingType, innkeeperBookingNumbers, innkeeperBookingReference, dealStage, emailRecipient, ticketId, dealOwnerId) => {
 		setIsCreatingDeal(true);
 		const { response } = await runServerless({
 			name: "createDeal",
@@ -99,7 +120,8 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 				dealStage,
 				emailRecipient,
 				ticketId,
-				dealOwner
+				dealOwnerId
+
 			}
 		});
 		console.log("Response from createDeal:", response);
@@ -269,7 +291,10 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 					const blockBookingType = event.targetValue["block-booking-type"];
 					const dealStage = event.targetValue["deal-stage"];
 					const emailRecipient = event.targetValue["block-booking-email-recipient"];
-					const dealOwner = context?.user?.id;
+					// const dealOwner = context?.user?.id;
+					const dealOwnerId = dealOwner; // ✅ real owner ID
+
+
 					const description = event.targetValue["description"];
 
 					validateBlockBookingForm(
@@ -289,7 +314,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 								emailRecipient,
 								ticketId,
 								dealOwner,
-								description
+								description,
 							});
 							setFormWasSubmitted(true);
 						},
