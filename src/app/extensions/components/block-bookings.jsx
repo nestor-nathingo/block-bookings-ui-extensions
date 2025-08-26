@@ -1,3 +1,9 @@
+/**
+ * Block Bookings
+ * @author: Nestor Nathingo
+ * @description: This is a sample HubSpot UI extension that demonstrates how to validate and create deals for block bookings.
+ */
+
 import React, { useState, useEffect } from "react";
 import {
 	Divider,
@@ -75,37 +81,104 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 		},
 	});
 
-	// Track if the form has been submitted and validated successfully
+	// Tracks if the form has been submitted and validated successfully
 	const [formWasSubmitted, setFormWasSubmitted] = useState(false);
 
 
-	const [dealOwner, setDealOwner] = useState(null);
+	const [dealOwnerId, setDealOwnerId] = useState(null);
 
 
 	useEffect(() => {
 		if (context?.crm?.contact?.email) {
 			setEmailRecipient(context.crm.contact.email);
 		}
-		// const fetchDealOwner = async () => {
-		// 	const { response } = await runServerless({
-		// 		name: "getOwners",
-		// 		parameters: { userId: context.user.id },
-		// 	});
+		async function fetchOwner() {
+			const { response } = await runServerless({
+				name: "getOwner",
+				parameters: { userId: context.user.id }
+			});
 
-		// 	console.log("Response from getOwners:", response);
+			if (response.owner) {
+				setDealOwnerId(response.owner.id);
+			}
+		}
 
-		// 	if (response?.owner) {
-		// 		setDealOwner(response.owner.id); // hubspot_owner_id
-		// 	} else {
-		// 		console.error("Owner not found for userId:", context.user.id);
-		// 	}
-		// };
-
-		// fetchDealOwner();
+		fetchOwner();
 	}, [context]);
 
 	const getFormStates = () => formValidationStates;
-	const dealOwnerId = dealOwner;
+	const resetForm = () => {
+		setBlockBookingType("");
+		setEmailRecipient(context?.crm?.contact?.email || "");
+		setIsLoading(null);
+		setValidatedFormData(null);
+		setIsFormSubmissionSuccessful(false);
+		setFormWasSubmitted(false);
+		setCreatedDealInfo(null);
+		setFormValidationStates({
+			dealName: {
+				required: true,
+				message: "Please enter a name for the block booking",
+				isValid: true,
+				label: "deal-name",
+			},
+			dealType: {
+				required: true,
+				message: "Please select a deal type",
+				isValid: true,
+				label: "deal-type",
+			},
+			dealStage: {
+				required: true,
+				message: "Please select a deal stage",
+				isValid: true,
+				label: "deal-stage",
+			},
+			blockBookingType: {
+				required: true,
+				message: "Please select a block booking type",
+				isValid: true,
+				label: "block-booking-type",
+			},
+			innkeeperBookingNumbers: {
+				required: true,
+				message: "Please enter innkeeper booking numbers",
+				pattern: /^([A-Z]{2}\d+(?:,\s*[A-Z]{2}\d+)*)$/,
+				patternMessage: "Innkeeper booking numbers must be a comma-separated list of two capital letters followed by numbers (e.g. AA1234, BB5678)",
+				isValid: true,
+				label: "innkeeper-booking-numbers",
+			},
+			innkeeperBookingReference: {
+				required: true,
+				message: "Please enter innkeeper booking reference",
+				patternMessage: "Innkeeper booking reference must exist on Innkeeper",
+				isValid: true,
+				label: "innkeeper-booking-reference",
+			},
+			emailRecipient: {
+				required: false,
+				message: "Please enter email recipient",
+				pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+				patternMessage: "Email recipient must be a valid email address (e.g. example@domain.com)",
+				isValid: true,
+				label: "block-booking-email-recipient",
+			},
+		});
+	};
+
+	/** 
+	* Creates a new deal in HubSpot.
+	* @param {string} dealName - The name of the deal.
+	* @param {string} dealType - The type of the deal.
+	* @param {string} blockBookingType - The block booking type.
+	* @param {string} innkeeperBookingNumbers - The innkeeper booking numbers.
+	* @param {string} innkeeperBookingReference - The innkeeper booking reference.
+	* @param {string} dealStage - The stage of the deal.
+	* @param {string} emailRecipient - The email recipient for notifications.
+	* @param {string} ticketId - The ticket ID associated with the deal.
+	* @param {string} dealOwnerId - The owner ID for the deal.
+	* @returns {Promise<void>}
+	*/
 
 	const createDeal = async (dealName, dealType, blockBookingType, innkeeperBookingNumbers, innkeeperBookingReference, dealStage, emailRecipient, ticketId, dealOwnerId) => {
 		setIsCreatingDeal(true);
@@ -124,11 +197,22 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 
 			}
 		});
-		console.log("Response from createDeal:", response);
 		setIsCreatingDeal(false);
 		setCreatedDealInfo(response);
-		sendAlert({ message: `Deal created: ${response?.dealName || 'Unknown'}`, type: "success" });
+
+		if (response && response.details && response.details.properties && response.details.properties.dealname) {
+			sendAlert({ message: `Deal created: ${response.details.properties.dealname}`, type: "success" });
+			resetForm();
+		} else {
+			sendAlert({ message: "Deal was not created. Please try again or check your input.", type: "danger" });
+		}
 	};
+
+	/**
+	 * Handles the click event for booking validation.
+	 * @param {*} bookingDisplays - The booking displays to validate.
+	 * @param {*} bookingReference - The booking reference to validate.
+	 */
 
 	const handleClick = async (bookingDisplays, bookingReference) => {
 		setIsLoading(true);
@@ -217,6 +301,11 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 		{ label: "FIT", value: "fit" },
 	];
 
+	/**
+	 * Renders the input field for the booking reference.
+	 * @returns {JSX.Element} - The input field for the booking reference.
+	 */
+
 	function bookingReferenceInput() {
 		if (blockBookingType === "tour") {
 			return (
@@ -276,12 +365,15 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 		}
 	}
 
-	// Helper to check if any field is invalid
+	
+	/**
+	 * Checks if the form has any validation errors.
+	 * @returns {boolean} - True if there are validation errors, false otherwise.
+	 */
 	const hasFormError = Object.values(formValidationStates).some(field => field.required && !field.isValid);
 
 	return (
 		<>
-			{console.log("Rendering DealValidation component with context:", context)}
 			<Form
 				onSubmit={(event) => {
 					const bookingDisplays = event.targetValue["innkeeper-booking-numbers"];
@@ -291,10 +383,6 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 					const blockBookingType = event.targetValue["block-booking-type"];
 					const dealStage = event.targetValue["deal-stage"];
 					const emailRecipient = event.targetValue["block-booking-email-recipient"];
-					// const dealOwner = context?.user?.id;
-					const dealOwnerId = dealOwner; // ✅ real owner ID
-
-
 					const description = event.targetValue["description"];
 
 					validateBlockBookingForm(
@@ -313,7 +401,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 								dealStage,
 								emailRecipient,
 								ticketId,
-								dealOwner,
+								dealOwnerId,
 								description,
 							});
 							setFormWasSubmitted(true);
@@ -453,9 +541,10 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 					Validate bookings
 				</LoadingButton>
 				{formWasSubmitted && isFormSubmissionSuccessful && validatedFormData && !isLoading && !hasFormError && (
-					<Button
+					<LoadingButton
 						variant="secondary"
 						disabled={!validatedFormData}
+						loading={isCreatingDeal}
 						onClick={async () => {
 							if (validatedFormData) {
 								await createDeal(
@@ -467,7 +556,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 									validatedFormData.dealStage,
 									validatedFormData.emailRecipient,
 									ticketId,
-									validatedFormData.dealOwner,
+									validatedFormData.dealOwnerId,
 								);
 							} else {
 								sendAlert({ message: "Please submit the form first", type: "danger" });
@@ -475,66 +564,9 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 						}}
 					>
 						Create deal
-					</Button>
+					</LoadingButton>
 				)}
-				{isCreatingDeal && <LoadingSpinner />}
 			</Form>
-		</>
-	);
-};
-
-// Define the Extension component, taking in runServerless, context, & sendAlert as props
-export const HubExtension = ({ context, runServerless, sendAlert }) => {
-	const [text, setText] = useState("");
-
-	// Call serverless function to execute with parameters.
-	// The `myFunc` function name is configured inside `serverless.json`
-	const handleClick = async () => {
-		const { response } = await runServerless({ name: "myFunc", parameters: { text: text } });
-		sendAlert({ message: response });
-	};
-
-	return (
-		<>
-			<Text>
-				<Text format={{ fontWeight: "bold" }}>
-					Your first UI extension is ready!
-				</Text>
-				Congratulations, {context.user.firstName}! You just deployed your first
-				HubSpot UI extension. This example demonstrates how you would send
-				parameters from your React frontend to the serverless function and get a
-				response back.
-			</Text>
-			<Flex direction="row" align="end" gap="small">
-				<Input name="text" label="Send" onInput={(t) => setText(t)} />
-				<Button type="submit" onClick={handleClick}>
-					Click me
-				</Button>
-			</Flex>
-			<Divider />
-			<Text>
-				What now? Explore all available{" "}
-				<Link href="https://developers.hubspot.com/docs/platform/ui-extension-components">
-					UI components
-				</Link>
-				, get an overview of{" "}
-				<Link href="https://developers.hubspot.com/docs/platform/ui-extensions-overview">
-					UI extensions
-				</Link>
-				, learn how to{" "}
-				<Link href="https://developers.hubspot.com/docs/platform/create-ui-extensions">
-					add a new custom card
-				</Link>
-				, jump right in with our{" "}
-				<Link href="https://developers.hubspot.com/docs/platform/ui-extensions-quickstart">
-					Quickstart Guide
-				</Link>
-				, or check out our{" "}
-				<Link href="https://github.com/HubSpot/ui-extensions-react-examples">
-					code Samples
-				</Link>
-				.
-			</Text>
 		</>
 	);
 };

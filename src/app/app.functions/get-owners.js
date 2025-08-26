@@ -1,28 +1,22 @@
-
-//implement my getOwners serveless function to get the currently logged in user's owner ID
-// 
+/**
+ * Get Owners
+ * @author: Nestor Nathingo
+ * @description: This function retrieves the owner ID for a given user in HubSpot.
+ */
 const hubspot = require('@hubspot/api-client');
+const hubspotClient = new hubspot.Client({ accessToken: process.env.HUBSPOT_ACCESS_TOKEN });
 
 exports.main = async (context = {}) => {
+    const userId = context.parameters?.userId;
 
-    const hubspot = require('@hubspot/api-client');
-    const hubspotClient = new hubspot.Client({
-        accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
-    });
-
-    const archived = false;
+    if (!userId) {
+        return { error: 'No userId provided' };
+    }
 
     try {
-        const userId = context.parameters?.userId;
-        if (!userId) {
-            return { error: "No userId provided" };
-        }
-
-        const owner = await hubspotClient.crm.owners.ownersApi.getById(userId, "id", archived);
-
-        return { owner };
+        const owner = await hubspotClient.crm.owners.ownersApi.getById(userId, 'userId');
+        return { owner };  // owner.id is the hubspot_owner_id
     } catch (err) {
-        console.error("Error fetching owner", err.response?.body || err.message);
-        return { error: err.message };
+        return { error: err.response?.body || err.message };
     }
 };

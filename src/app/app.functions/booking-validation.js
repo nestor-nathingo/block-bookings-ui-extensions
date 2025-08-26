@@ -1,3 +1,8 @@
+/**
+ * Booking Validation
+ * @author: Nestor Nathingo
+ * @description: This function validates booking information for block bookings.
+ */
 const axios = require('axios');
 
 exports.main = async (context = {}) => {
@@ -9,7 +14,7 @@ exports.main = async (context = {}) => {
    * @param {Object} bookingResponse - The response object from the booking API.
    * @returns {Object} - Transformed response with validation status and messages.
    */
-
+  
   function transformBookingResponse(bookingResponse) {
     const result = {};
 
@@ -25,9 +30,8 @@ exports.main = async (context = {}) => {
     return result;
   }
 
-  //
   try {
-    // Validate the required parameters
+    // Validates the required parameters
     let parameters = {
       "Block_Booking_Validation": 1,
       ...(!!bookingDisplays && { "Booking_Displays": bookingDisplays }),

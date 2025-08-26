@@ -1,9 +1,5 @@
 {
   "appFunctions": {
-    "myFunc": {
-      "file": "example-function.js",
-      "secrets": []
-    },
     "bookingValidation": {
       "file": "booking-validation.js",
       "secrets": [
@@ -17,7 +13,7 @@
         "HUBSPOT_DEAL_PIPELINE"
       ]
     },
-    "getOwners": {
+    "getOwner": {
       "file": "get-owners.js",
       "secrets": [
         "HUBSPOT_ACCESS_TOKEN"
