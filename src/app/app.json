@@ -7,6 +7,7 @@
     "crm.objects.contacts.write",
     "crm.objects.deals.read",
     "crm.objects.deals.write",
+    "crm.objects.owners.read",
     "tickets"
   ],
   "public": false,

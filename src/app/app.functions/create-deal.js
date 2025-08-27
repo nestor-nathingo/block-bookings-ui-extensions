@@ -1,14 +1,14 @@
-// creates a deal in hubspot
+/**
+ * Create Deal
+ * @author: Nestor Nathingo
+ * @description: This function creates a deal in HubSpot using the HubSpot API.
+ */
 const hubspot = require('@hubspot/api-client');
 
 exports.main = async (context = {}) => {
-     console.log('Handler invoked. Create Deal Context:', context);
-    console.log("Creating a deal in HubSpot with the following parameters:", context.parameters);
 
     const { dealName, dealType, blockBookingType, innkeeperBookingNumbers, innkeeperBookingReference, dealStage, emailRecipient, ticketId, dealOwnerId } = context.parameters;
-
     const hubspotClient = new hubspot.Client({ accessToken: process.env.HUBSPOT_ACCESS_TOKEN });
-
     const dealPipeline = process.env.HUBSPOT_DEAL_PIPELINE;
 
     const dealProperties = {
@@ -16,34 +16,27 @@ exports.main = async (context = {}) => {
             dealname: dealName,
             dealtype: dealType,
             dealstage: dealStage,
-            pipeline: dealPipeline.toString(), // Ensure the pipeline ID is a string
+            pipeline: dealPipeline.toString(),
             block_booking_type: blockBookingType,
             innkeeper_booking_numbers: innkeeperBookingNumbers,
             innkeeper_booking_references: innkeeperBookingReference,
             block_booking_email_recipient: emailRecipient,
-             hubspot_owner_id: dealOwnerId
+            hubspot_owner_id: dealOwnerId
         },
     };
-    console.debug("📨 Payload to HubSpot API:", dealProperties);
 
     try {
         const createDealResponse = await hubspotClient.crm.deals.basicApi.create(dealProperties);
-        console.info("✅ Deal created successfully");
-        console.debug("📬 Response from HubSpot API:", createDealResponse);
 
         const dealId = createDealResponse.id;
-        console.info(`Deal ID: ${dealId}`);
 
-        //2. Associate the deal with the ticket
+        // 2. Associate the deal with the ticket
         if (ticketId && dealId) {
-            console.info(`Associating deal with ticket ID: ${ticketId}`);
-            await hubspotClient.crm.deals.associationsApi.create(dealId,         // fromObjectId
-                'tickets',      // toObjectType
-                ticketId,       // toObjectId
+            await hubspotClient.crm.deals.associationsApi.create(dealId,
+                'tickets',
+                ticketId,
                 27
             );
-            console.info("✅ Deal associated with ticket successfully");
-            console.log(`Deal ${dealId} associated with ticket ${ticketId}`);
         }
 
         return {
@@ -56,7 +49,6 @@ exports.main = async (context = {}) => {
             }
         }
     } catch (error) {
-        console.log("❌ Error creating deal:", error.message);
         console.error("❌ Error creating deal:", {
             message: error.message,
             statusCode: error.response?.status,
