@@ -1,6 +1,6 @@
 /**
  * Block Bookings
- * @author: Nestor Nathingo
+ * @author: Nestor Nathingo & Salim Katjivirue
  * @description: This is a sample HubSpot UI extension that demonstrates how to validate and create deals for block bookings.
  */
 

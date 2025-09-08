@@ -1,51 +1,90 @@
-# 🧾 Block Bookings Validation Assistant – HubSpot UI Extension
+*# 🧾 Block Bookings Validation Assistant – HubSpot UI Extension
 
-This project is a custom [HubSpot UI Extension](https://developers.hubspot.com/docs/platform/ui-extensions-overview) designed to simplify and automate the process of validating block booking data (e.g., ADHOC, TOUR, FIT bookings) and creating CRM deals within HubSpot.
+A custom [HubSpot UI Extension](https://developers.hubspot.com/docs/platform/ui-extensions-overview) for automating and validating block booking data (ADHOC, TOUR, FIT bookings) and streamlining CRM deal creation.
 
-It provides a guided form interface for sales or reservations teams to:
-- ✅ Validate booking numbers or references using backend logic
-- ✅ Automatically create deals in the appropriate pipeline and stage
-- ✅ Ensure data consistency across departments
-- ✅ Reduce manual data entry and booking errors
+## Features
 
-### 🔧 Built With
-- React (via `@hubspot/ui-extensions`)
-- HubSpot CRM SDK and Serverless Functions
-- Node.js (`@hubspot/api-client`)
-- Environment-based deployment (sandbox → production)
+- **Booking Validation:** Validate booking numbers or references using backend logic.
+- **Automated Deal Creation:** Create deals in the correct pipeline and stage automatically.
+- **Data Consistency:** Ensure consistent data across departments.
+- **Error Reduction:** Minimize manual entry and booking errors.
 
-### 🚀 Deployment Environments
-Supports environment-based config for sandbox and production, including access tokens and pipeline metadata via environment variables.
+## Tech Stack
 
----
+- **React** (`@hubspot/ui-extensions`)
+- **HubSpot CRM SDK & Serverless Functions**
+- **Node.js** (`@hubspot/api-client`)
+- **Environment-based Deployment:** Sandbox and production support.
 
-> 🔐 **Important:** API keys and access tokens are stored securely and excluded from version control using `.env` and `.gitignore`.
-
----
-
-### 📂 Folder Structure
+## Folder Structure
 
 ```
 src/
 ├── components/
-│ └── block-bookings.jsx
+│   └── block-bookings.jsx
 ├── serverless/
-│ ├── createDeal.js
-│ └── bookingValidation.js
+│   ├── createDeal.js
+│   └── bookingValidation.js
 └── utils/
-└── block-bookings-utils.js
+    └── block-bookings-utils.js
 ```
----
 
-### 🛠 Setup Instructions
-1. Clone the repo
-2. Run `npm install`
-3. Set up your `.env` with HubSpot access token(s)
-4. Use the HubSpot CLI to deploy: `hs upload src my-extension`
-5. Use `hs project sandbox` and `hs project prod` for different environments
+## Getting Started
 
----
+### Prerequisites
 
-The HubSpot CLI enables you to run this project locally so that you may test and iterate quickly. Getting started is simple, just run this HubSpot CLI command in your project directory and follow the prompts:
+- Node.js (v16+ recommended)
+- HubSpot CLI (`npm install -g @hubspot/cli`)
+- HubSpot developer account
 
-`hs project dev`
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-org/block-bookings-ui-extensions.git
+   cd block-bookings-ui-extensions
+   ```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+3. **Configure environment variables**
+   - Create a `.env` file in the root directory.
+   - Add your HubSpot access token(s) and pipeline metadata.
+   - Example:
+     ```env
+     HUBSPOT_ACCESS_TOKEN=your-access-token
+     PIPELINE_ID=your-pipeline-id
+     BOOKING_URL=your-booking-url
+     ```
+4. **Deploy to HubSpot**
+   - Sandbox (UAT):
+     - Push to the `block-bookings-ui-extensions/UAT` branch on GitHub.
+     - This will automatically update the HubSpot sandbox environment.
+   - Production (Live):
+     - Push to the `block-bookings-ui-extensions/main` branch on GitHub.
+     - This will automatically update the HubSpot live environment.
+
+### Local Development
+
+Run the following command to start the local development server and follow the prompts:
+```bash
+hs project dev
+```
+
+## Security
+
+- API keys and access tokens are stored securely in `.env` files.
+- Sensitive files are excluded from version control via `.gitignore`.
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+[MIT](LICENSE)
+
+## Author
+Nestor Nathingo
+
+## Support
+For questions, please open an issue or contact the repository maintainer.*
