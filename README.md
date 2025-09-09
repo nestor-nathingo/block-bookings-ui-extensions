@@ -1,4 +1,4 @@
-*# 🧾 Block Bookings Validation Assistant – HubSpot UI Extension
+# 🧾 Block Bookings Validation Assistant – HubSpot UI Extension
 
 A custom [HubSpot UI Extension](https://developers.hubspot.com/docs/platform/ui-extensions-overview) for automating and validating block booking data (ADHOC, TOUR, FIT bookings) and streamlining CRM deal creation.
 
