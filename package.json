@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@hubspot/cms-components": "^1.0.38",
     "@hubspot/ui-extensions": "^0.9.2"
   }
 }

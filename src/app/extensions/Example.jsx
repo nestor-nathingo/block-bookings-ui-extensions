@@ -8,7 +8,7 @@ import {
   Flex,
   hubspot,
 } from "@hubspot/ui-extensions";
-import { HubExtension, DealValidation } from "./components/block-bookings";
+import { DealValidation } from "./components/block-bookings";
 
 // Define the extension to be run within the Hubspot CRM
 hubspot.extend(({ context, runServerlessFunction, actions }) => (
