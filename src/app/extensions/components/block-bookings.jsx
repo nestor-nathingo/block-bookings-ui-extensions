@@ -6,19 +6,13 @@
 
 import React, { useState, useEffect } from "react";
 import {
-	Divider,
-	Link,
-	Button,
 	Text,
 	Input,
-	Flex,
 	Form,
 	Select,
 	LoadingButton,
-	LoadingSpinner
 } from "@hubspot/ui-extensions";
 import { validateBlockBookingForm } from "./utils/block-bookings-utils";
-
 
 export const DealValidation = ({ context, runServerless, sendAlert }) => {
 	const ticketId = context?.crm?.objectId;
@@ -83,10 +77,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 
 	// Tracks if the form has been submitted and validated successfully
 	const [formWasSubmitted, setFormWasSubmitted] = useState(false);
-
-
 	const [dealOwnerId, setDealOwnerId] = useState(null);
-
 
 	useEffect(() => {
 		if (context?.crm?.contact?.email) {
@@ -365,7 +356,7 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 		}
 	}
 
-	
+
 	/**
 	 * Checks if the form has any validation errors.
 	 * @returns {boolean} - True if there are validation errors, false otherwise.
@@ -566,7 +557,9 @@ export const DealValidation = ({ context, runServerless, sendAlert }) => {
 						Create deal
 					</LoadingButton>
 				)}
+
 			</Form>
 		</>
 	);
 };
+
